@@ -12,6 +12,16 @@ namespace wumpus {
 
 const std::string Cave::game_info_file = "game_info.txt";
 
+const std::string Cave::wumpus_adjacent_message = "You smell the wumpus!";
+const std::string Cave::bat_adjacent_message = "You hear flapping!";
+const std::string Cave::pit_adjacent_message = "You feel a breeze!";
+const std::string Cave::wumpus_dead_message = "Congratulations, you have slain the wumpus!";
+const std::string Cave::player_eaten_message = "You have been eaten by the wumpus!";
+const std::string Cave::player_dropped_in_random_room_message = "You are carried away by a bat!";
+const std::string Cave::player_fell_message = "You have fallen into a bottomless pit!";
+const std::string Cave::player_quit_message = "You flee the cave!";
+const std::string Cave::wumpus_moves_message = "You hear the sound of the wumpus moving!";
+
 const std::array<std::array<int, Cave::connections_per_room>, Cave::num_rooms> Cave::room_connections {{
 	{{1, 4, 5}}, {{2, 0, 7}}, {{3, 1, 9}}, {{4, 2, 11}}, {{0, 3, 13}},
 	{{6, 14, 0}}, {{7, 5, 15}}, {{8, 6, 1}}, {{9, 7, 16}}, {{10, 8, 2}}, {{11, 9, 17}}, {{12, 10, 3}}, {{13, 11, 18}}, {{14, 12, 4}}, {{5, 13, 19}},
@@ -117,11 +127,11 @@ void Cave::inform_player_of_hazards() const {
 			pit = true;
 	}
 	if (wumpus)
-		std::cout << "You smell the wumpus!" << std::endl;
+		std::cout << wumpus_adjacent_message << std::endl;
 	if (bat)
-		std::cout << "You hear flapping!" << std::endl;
+		std::cout << bat_adjacent_message << std::endl;
 	if (pit)
-		std::cout << "You feel a breeze!" << std::endl;
+		std::cout << pit_adjacent_message << std::endl;
 }
 
 Cave::Action Cave::get_action() const {
@@ -205,7 +215,7 @@ void Cave::check_room_hazards() {
 			return;
 		}
 		if (player_room->bat) {
-			std::cout << "You are carried away by a bat!" << std::endl;
+			std::cout << player_dropped_in_random_room_message << std::endl;
 			player_room = &rooms[random(0, num_rooms - 1)];
 			continue;
 		}
@@ -223,10 +233,6 @@ void Cave::shoot(const std::array<int, arrow_range>& targets) {
 		previous_room = temp;
 		if (room->wumpus) {
 			state = Game_state::wumpus_dead;
-			return;
-		}
-		if (player_room->number == room->number) {
-			state = Game_state::player_shot;
 			return;
 		}
 	}
@@ -248,7 +254,7 @@ Cave::Room* Cave::get_next_room_for_arrow_flight(Room* previous_room, Room* curr
 }
 
 void Cave::move_wumpus() {
-	std::cout << "You hear the sound of the wumpus moving!" << std::endl;
+	std::cout << wumpus_moves_message << std::endl;
 	Room* new_wumpus_room = wumpus_room->adjacent_rooms[random(0, connections_per_room - 1)];
 	new_wumpus_room->wumpus = true;
 	wumpus_room->wumpus = false;
@@ -265,19 +271,16 @@ void Cave::quit() {
 void Cave::end_hunt() const {
 	switch (state) {
 	case Game_state::player_eaten:
-		std::cout << "You have been eaten by the wumpus!" << std::endl;
+		std::cout << player_eaten_message << std::endl;
 		break;
 	case Game_state::player_fell:
-		std::cout << "You have fallen into a bottomless pit!" << std::endl;
-		break;
-	case Game_state::player_shot:
-		std::cout << "You have been hit with your own arrow!" << std::endl;
+		std::cout << player_fell_message << std::endl;
 		break;
 	case Game_state::wumpus_dead:
-		std::cout << "Congratulations, you have slain the wumpus!" << std::endl;
+		std::cout << wumpus_dead_message << std::endl;
 		break;
 	case Game_state::player_quit:
-		std::cout << "You flee the cave!" << std::endl;
+		std::cout << player_quit_message << std::endl;
 		break;
 	default:
 		throw std::logic_error("Invalid end of game state");

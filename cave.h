@@ -15,6 +15,16 @@ public:
 	void hunt();
 private:
 	static const std::string game_info_file;
+	
+	static const std::string wumpus_adjacent_message;
+	static const std::string bat_adjacent_message;
+	static const std::string pit_adjacent_message;
+	static const std::string wumpus_dead_message;
+	static const std::string player_eaten_message;
+	static const std::string player_dropped_in_random_room_message;
+	static const std::string player_fell_message;
+	static const std::string player_quit_message;
+	static const std::string wumpus_moves_message;
 
 	static const int num_rooms = 20;
 	static const int connections_per_room = 3;
@@ -45,7 +55,6 @@ private:
 		none,
 		player_eaten,
 		player_fell,
-		player_shot,
 		wumpus_dead,
 		player_quit
 	} state {Game_state::none};
