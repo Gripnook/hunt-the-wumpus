@@ -8,7 +8,7 @@ ${PROGNAME}: main.o cave.o
 	${CXX} ${CXXFLAGS} $^ -o ${PROGNAME}
 
 main.o: main.cpp cave.h
-cave.o: cave.cpp cave.h
+cave.o: cave.cpp cave.h random.h
 
 clean:
 	rm *.o ${PROGNAME}

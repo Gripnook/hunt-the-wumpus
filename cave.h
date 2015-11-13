@@ -1,7 +1,6 @@
 #ifndef WUMPUS_CAVE_H
 #define WUMPUS_CAVE_H
 
-#include <vector>
 #include <array>
 #include <string>
 
@@ -11,8 +10,8 @@ class Cave {
 public:
 	Cave();
 
-	void print_game_info() const;
-	void hunt();
+	void print_game_info() const; // Print the game information to the console.
+	void hunt(); // Play a round of the game.
 private:
 	static const std::string wumpus_adjacent_message;
 	static const std::string bat_adjacent_message;
@@ -47,12 +46,6 @@ private:
 		std::array<Room*, connections_per_room> adjacent_rooms;
 	};
 
-	std::array<Room, num_rooms> rooms;
-	Room* player_room {nullptr};
-	Room* wumpus_room {nullptr};
-
-	int arrows {num_arrows};
-
 	enum class Game_state {
 		none,
 		player_eaten,
@@ -60,12 +53,7 @@ private:
 		player_shot,
 		wumpus_dead,
 		player_quit
-	} state {Game_state::none};
-
-	void init_hunt();
-	void reset_rooms();
-	void shuffle_room_numbers();
-	void place_hazards();
+	};
 
 	struct Action {
 		enum Action_type {
@@ -74,22 +62,36 @@ private:
 		std::array<int, arrow_range> targets;
 	};
 
+	std::array<Room, num_rooms> rooms;
+	Room* player_room {nullptr};
+	Room* wumpus_room {nullptr};
+
+	Game_state state {Game_state::none};
+
+	int arrows {num_arrows};
+
+	void init_hunt();
+	void reset_rooms();
+	void shuffle_room_numbers();
+	void sort_adjacent_rooms();
+	void place_player_and_hazards();
+
 	bool is_hunt_over() const;
 	void play_round_of_hunt();
 	void inform_player_of_hazards() const;
 	Action get_action() const;
+	Action::Action_type get_action_type(char type) const;
+	bool is_valid_action(const Action& action) const;
+	bool first_room_is_adjacent(const Action& action) const;
 	void print_prompt() const;
 	void move(int target);
 	void check_room_hazards();
 	void shoot(const std::array<int, arrow_range>& targets);
-	Room* get_next_room_for_arrow_flight(Room* previous_room, Room* current_room, int target) const;
+	Room* get_next_room_for_arrow_flight(const Room* previous_room, const Room* current_room, int target) const;
 	void move_wumpus();
 	void quit();
 	void end_hunt() const;
 
-	int random(int lower, int upper) const;
-	int random(int lower, int upper, const std::vector<int>& excludes) const;
-	
 	void print_debug() const;
 };
 

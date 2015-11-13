@@ -1,10 +1,10 @@
 #include "cave.h"
+#include "random.h"
 #include <vector>
 #include <array>
 #include <algorithm>
 #include <string>
 #include <sstream>
-#include <random>
 #include <iostream>
 #include <stdexcept>
 
@@ -50,7 +50,7 @@ void Cave::print_game_info() const {
 		<< "	\"" << bat_adjacent_message << "\": A giant bat is in an adjacent room." << std::endl
 		<< "During each turn you must make a move. The possible moves are:" << std::endl
 		<< "	\"m #\": Move to an adjacent room." << std::endl
-		<< "	\"s #[-#[-#]]\": Shoot an arrow through the rooms specified. The" << std::endl
+		<< "	\"s #[-#...]\": Shoot an arrow through the rooms specified. The" << std::endl
 		<< "		first room number specified must be an adjacent room. The" << std::endl
 		<< "		range of an arrow is " << arrow_range << " rooms, and a path will be chosen at" << std::endl
 		<< "		random if not specified. You have " << num_arrows << " arrows at the start of" << std::endl
@@ -67,11 +67,11 @@ void Cave::hunt() {
 }
 
 void Cave::init_hunt() {
-	reset_rooms();
-	arrows = num_arrows;
 	state = Game_state::none;
+	arrows = num_arrows;
+	reset_rooms();
 	shuffle_room_numbers();
-	place_hazards();
+	place_player_and_hazards();
 }
 
 void Cave::reset_rooms() {
@@ -83,12 +83,12 @@ void Cave::reset_rooms() {
 }
 
 void Cave::shuffle_room_numbers() {
-	for (int i = 0; i < num_rooms; ++i) {
-		int j = random(i, num_rooms - 1);
-		int temp = rooms[j].number;
-		rooms[j].number = rooms[i].number;
-		rooms[i].number = temp;
-	}
+	for (int i = 0; i < num_rooms; ++i)
+		std::swap(rooms[i].number, rooms[random(i, num_rooms)].number);
+	sort_adjacent_rooms(); // This is necessary to eliminate patterns in the display of adjacent rooms.
+}
+
+void Cave::sort_adjacent_rooms() {
 	for (Room& room : rooms) {
 		std::sort(room.adjacent_rooms.begin(), room.adjacent_rooms.end(),
 			[](Room* first_room, Room* second_room) {
@@ -97,10 +97,10 @@ void Cave::shuffle_room_numbers() {
 	}
 }
 
-void Cave::place_hazards() {
+void Cave::place_player_and_hazards() {
 	std::vector<int> random_locations;
 	for (int i = 0; i < 2 + num_bats + num_pits; ++i)
-		random_locations.push_back(random(0, num_rooms - 1, random_locations));
+		random_locations.push_back(random(0, num_rooms, random_locations));
 
 	int index = 0;
 	player_room = &rooms[random_locations[index++]];
@@ -133,10 +133,11 @@ void Cave::play_round_of_hunt() {
 		throw std::logic_error("Invalid player action!");
 	}
 }
+
 void Cave::inform_player_of_hazards() const {
 	std::cout << std::endl;
 	bool wumpus = false, bat = false, pit = false;
-	for (Room* room : player_room->adjacent_rooms) {
+	for (const Room* room : player_room->adjacent_rooms) {
 		if (room->wumpus)
 			wumpus = true;
 		if (room->bat)
@@ -153,56 +154,62 @@ void Cave::inform_player_of_hazards() const {
 }
 
 Cave::Action Cave::get_action() const {
-	while (true) {
+	Action action;
+	while (!is_valid_action(action)) {
 		print_prompt();
-		Action action;
 		std::string input;
 		std::getline(std::cin, input);
 		std::istringstream in(input);
 		char type = '\0';
 		in >> type;
-		switch (type) {
-		case 'm':
-		{
-			action.type = Action::Action_type::move;
-			in >> action.targets[0];
-			for (Room* room : player_room->adjacent_rooms)
-				if (room->number == action.targets[0])
-					return action;
-			break;
-		}
-		case 's':
-		{
-			if (arrows <= 0)
-				break;
-			action.type = Action::Action_type::shoot;
-			in >> action.targets[0];
-			bool valid = false;
-			for (Room* room : player_room->adjacent_rooms) {
-				if (room->number == action.targets[0]) {
-					valid = true;
-					break;
-				}
-			}
-			if (!valid)
-				break;
-			for (int i = 1; i < arrow_range; ++i) {
-				char ch = '\0';
-				in.get(ch);
+		if (type == 'd') {
+			print_debug();
+		} else {
+			action.type = get_action_type(type);
+			for (int i = 0; i < arrow_range; ++i) {
 				in >> action.targets[i];
 				if (!in)
 					action.targets[i] = 0;
+				in.get();
 			}
-			return action;
-		}
-		case 'q':
-			action.type = Action::Action_type::quit;
-			return action;
-		case 'd':
-			print_debug();
-			break;
 		}
 	}
+	return action;
+}
+
+Cave::Action::Action_type Cave::get_action_type(char type) const {
+	switch (type) {
+	case 'm':
+		return Action::Action_type::move;
+	case 's':
+		return Action::Action_type::shoot;
+	case 'q':
+		return Action::Action_type::quit;
+	default:
+		return Action::Action_type::none;
+	}
+}
+
+bool Cave::is_valid_action(const Action& action) const {
+	switch (action.type) {
+	case Action::Action_type::move:
+		return first_room_is_adjacent(action);
+	case Action::Action_type::shoot:
+		if (arrows <= 0)
+			return false;
+		return first_room_is_adjacent(action);
+	case Action::Action_type::quit:
+		return true;
+	default:
+		return false;
+	}
+}
+
+bool Cave::first_room_is_adjacent(const Action& action) const {
+	for (const Room* room : player_room->adjacent_rooms)
+		if (room->number == action.targets[0])
+			return true;
+	return false;
 }
 
 void Cave::print_prompt() const {
@@ -234,7 +241,7 @@ void Cave::check_room_hazards() {
 		}
 		if (player_room->bat) {
 			std::cout << player_dropped_in_random_room_message << std::endl;
-			player_room = &rooms[random(0, num_rooms - 1)];
+			player_room = &rooms[random(0, num_rooms)];
 			continue;
 		}
 		break;
@@ -246,9 +253,9 @@ void Cave::shoot(const std::array<int, arrow_range>& targets) {
 	Room* room = player_room;
 	Room* previous_room = nullptr;
 	for (int i = 0; i < arrow_range; ++i) {
-		Room* temp = room;
+		Room* next_previous_room = room;
 		room = get_next_room_for_arrow_flight(previous_room, room, targets[i]);
-		previous_room = temp;
+		previous_room = next_previous_room;
 		if (room->wumpus) {
 			state = Game_state::wumpus_dead;
 			return;
@@ -261,29 +268,27 @@ void Cave::shoot(const std::array<int, arrow_range>& targets) {
 	move_wumpus();
 }
 
-Cave::Room* Cave::get_next_room_for_arrow_flight(Room* previous_room, Room* current_room, int target) const {
-	int previous_number = 0;
-	if (previous_room)
-		previous_number = previous_room->number;
+Cave::Room* Cave::get_next_room_for_arrow_flight(const Room* previous_room, const Room* current_room, int target) const {
+	int previous_number = previous_room ? previous_room->number : 0;
 	if (previous_number != target)
 		for (Room* room : current_room->adjacent_rooms)
 			if (room->number == target)
 				return room;
-	Room* random_room = current_room->adjacent_rooms[random(0, connections_per_room - 1)];
-	while (random_room->number == previous_number)
-		random_room = current_room->adjacent_rooms[random(0, connections_per_room - 1)];
-	return random_room;
+	const std::array<Room*, connections_per_room>& candidate_rooms = current_room->adjacent_rooms;
+	return candidate_rooms[random_if(0, connections_per_room,
+		[candidate_rooms, previous_number](int x) {
+			return candidate_rooms[x]->number != previous_number;
+		})];
 }
 
 void Cave::move_wumpus() {
 	std::cout << wumpus_moves_message << std::endl;
-	Room* new_wumpus_room = wumpus_room->adjacent_rooms[random(0, connections_per_room - 1)];
+	Room* new_wumpus_room = wumpus_room->adjacent_rooms[random(0, connections_per_room)];
 	new_wumpus_room->wumpus = true;
 	wumpus_room->wumpus = false;
 	wumpus_room = new_wumpus_room;
-	if (player_room->wumpus) {
+	if (player_room->wumpus)
 		state = Game_state::player_eaten;
-	}
 }
 
 void Cave::quit() {
@@ -309,27 +314,6 @@ void Cave::end_hunt() const {
 		break;
 	default:
 		throw std::logic_error("Invalid end of game state");
-	}
-}
-
-int Cave::random(int lower, int upper) const {
-	std::uniform_int_distribution<int> rng_dist(lower, upper);
-	std::default_random_engine rng_engine {std::random_device()()};
-	return rng_dist(rng_engine);
-}
-
-int Cave::random(int lower, int upper, const std::vector<int>& excludes) const {
-	while (true) {
-		int result = random(lower, upper);
-		bool valid = true;
-		for (int exclude : excludes) {
-			if (result == exclude) {
-				valid = false;
-				break;
-			}
-		}
-		if (valid)
-			return result;
 	}
 }
 
