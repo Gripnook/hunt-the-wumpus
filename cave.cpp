@@ -1,6 +1,7 @@
 #include "cave.h"
 #include <vector>
 #include <array>
+#include <algorithm>
 #include <string>
 #include <sstream>
 #include <random>
@@ -87,6 +88,12 @@ void Cave::shuffle_room_numbers() {
 		int temp = rooms[j].number;
 		rooms[j].number = rooms[i].number;
 		rooms[i].number = temp;
+	}
+	for (Room& room : rooms) {
+		std::sort(room.adjacent_rooms.begin(), room.adjacent_rooms.end(),
+			[](Room* first_room, Room* second_room) {
+				return first_room->number < second_room->number;
+			});
 	}
 }
 
