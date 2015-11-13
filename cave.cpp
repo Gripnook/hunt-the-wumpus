@@ -16,6 +16,7 @@ const std::string Cave::wumpus_dead_message = "Congratulations, you have slain t
 const std::string Cave::player_eaten_message = "You have been eaten by the wumpus!";
 const std::string Cave::player_dropped_in_random_room_message = "You are carried away by a bat!";
 const std::string Cave::player_fell_message = "You have fallen into a bottomless pit!";
+const std::string Cave::player_shot_message = "You have been hit with your own arrow!";
 const std::string Cave::player_quit_message = "You flee the cave!";
 const std::string Cave::wumpus_moves_message = "You hear the sound of the wumpus moving!";
 
@@ -245,6 +246,10 @@ void Cave::shoot(const std::array<int, arrow_range>& targets) {
 			state = Game_state::wumpus_dead;
 			return;
 		}
+		if (room->number == player_room->number) {
+			state = Game_state::player_shot;
+			return;
+		}
 	}
 	move_wumpus();
 }
@@ -285,6 +290,9 @@ void Cave::end_hunt() const {
 		break;
 	case Game_state::player_fell:
 		std::cout << player_fell_message << std::endl;
+		break;
+	case Game_state::player_shot:
+		std::cout << player_shot_message << std::endl;
 		break;
 	case Game_state::wumpus_dead:
 		std::cout << wumpus_dead_message << std::endl;

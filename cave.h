@@ -21,6 +21,7 @@ private:
 	static const std::string player_eaten_message;
 	static const std::string player_dropped_in_random_room_message;
 	static const std::string player_fell_message;
+	static const std::string player_shot_message;
 	static const std::string player_quit_message;
 	static const std::string wumpus_moves_message;
 
@@ -56,6 +57,7 @@ private:
 		none,
 		player_eaten,
 		player_fell,
+		player_shot,
 		wumpus_dead,
 		player_quit
 	} state {Game_state::none};
