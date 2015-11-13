@@ -5,12 +5,9 @@
 #include <sstream>
 #include <random>
 #include <iostream>
-#include <fstream>
 #include <stdexcept>
 
 namespace wumpus {
-
-const std::string Cave::game_info_file = "game_info.txt";
 
 const std::string Cave::wumpus_adjacent_message = "You smell the wumpus!";
 const std::string Cave::bat_adjacent_message = "You hear flapping!";
@@ -37,12 +34,27 @@ Cave::Cave() {
 }
 
 void Cave::print_game_info() const {
-	std::ifstream in(game_info_file);
-	if (!in)
-		throw std::runtime_error("Unable to find game info file");
-	std::string buff;
-	while (std::getline(in, buff))
-		std::cout << buff << std::endl;
+	std::cout << "Welcome to Hunt the Wumpus." << std::endl
+		<< "Your job is to slay the wumpus living in the cave using bow and arrow." << std::endl
+		<< "Each of the " << num_rooms << " rooms is connected to " << connections_per_room << " other rooms by dark tunnels." << std::endl
+		<< "In addition to the wumpus, the cave has two hazards: bottomless pits and" << std::endl
+		<< "giant bats. If you enter a room with a bottomless pit, it's the end of the" << std::endl
+		<< "game for you. If you enter a room with a bat, the bat picks you up and" << std::endl
+		<< "drops you into another room. If you enter the room with the wumpus or he" << std::endl
+		<< "enters yours, he eats you. There are " << num_pits << " pits and " << num_bats << " bats in the cave." << std::endl
+		<< "When you enter a room you will be told if a hazard is nearby:" << std::endl
+		<< "	\"" << wumpus_adjacent_message << "\": It's in an adjacent room." << std::endl
+		<< "	\"" << pit_adjacent_message << "\": One of the adjacent rooms is a bottomless pit." << std::endl
+		<< "	\"" << bat_adjacent_message << "\": A giant bat is in an adjacent room." << std::endl
+		<< "During each turn you must make a move. The possible moves are:" << std::endl
+		<< "	\"m #\": Move to an adjacent room." << std::endl
+		<< "	\"s #[-#[-#]]\": Shoot an arrow through the rooms specified. The" << std::endl
+		<< "		first room number specified must be an adjacent room. The" << std::endl
+		<< "		range of an arrow is " << arrow_range << " rooms, and a path will be chosen at" << std::endl
+		<< "		random if not specified. You have " << num_arrows << " arrows at the start of" << std::endl
+		<< "		the game." << std::endl
+		<< "	\"q\": Quit the game and flee the cave." << std::endl
+		<< "Good luck!" << std::endl;
 }
 
 void Cave::hunt() {
@@ -78,20 +90,18 @@ void Cave::shuffle_room_numbers() {
 }
 
 void Cave::place_hazards() {
-	int player = random(0, num_rooms - 1);
-	int wumpus = random(0, num_rooms - 1, {player});
-	int first_bat = random(0, num_rooms - 1, {player, wumpus});
-	int second_bat = random(0, num_rooms - 1, {player, wumpus, first_bat});
-	int first_pit = random(0, num_rooms - 1, {player, wumpus, first_bat, second_bat});
-	int second_pit = random(0, num_rooms - 1, {player, wumpus, first_bat, second_bat, first_pit});
+	std::vector<int> random_locations;
+	for (int i = 0; i < 2 + num_bats + num_pits; ++i)
+		random_locations.push_back(random(0, num_rooms - 1, random_locations));
 
-	player_room = &rooms[player];
-	wumpus_room = &rooms[wumpus];
-	rooms[wumpus].wumpus = true;
-	rooms[first_bat].bat = true;
-	rooms[second_bat].bat = true;
-	rooms[first_pit].pit = true;
-	rooms[second_pit].pit = true;
+	int index = 0;
+	player_room = &rooms[random_locations[index++]];
+	wumpus_room = &rooms[random_locations[index++]];;
+	wumpus_room->wumpus = true;
+	while (index < 2 + num_bats)
+		rooms[random_locations[index++]].bat = true;
+	while (index < 2 + num_bats + num_pits)
+		rooms[random_locations[index++]].pit = true;
 }
 
 bool Cave::is_hunt_over() const {

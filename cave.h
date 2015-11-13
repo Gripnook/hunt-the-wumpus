@@ -14,8 +14,6 @@ public:
 	void print_game_info() const;
 	void hunt();
 private:
-	static const std::string game_info_file;
-	
 	static const std::string wumpus_adjacent_message;
 	static const std::string bat_adjacent_message;
 	static const std::string pit_adjacent_message;
@@ -31,6 +29,9 @@ private:
 	static const std::array<
 		std::array<int, connections_per_room>,
 		num_rooms> room_connections;
+	
+	static const int num_bats = 2;
+	static const int num_pits = 2;
 	
 	static const int arrow_range = 3;
 	static const int num_arrows = 5;
