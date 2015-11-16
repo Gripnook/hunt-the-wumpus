@@ -1,0 +1,6 @@
+# Object files used in compiling the program.
+*.o
+
+# Compiled program executable.
+hunt_the_wumpus
+
