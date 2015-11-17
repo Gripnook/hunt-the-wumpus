@@ -29,10 +29,10 @@ private:
 	static const std::array<
 		std::array<int, connections_per_room>,
 		num_rooms> room_connections;
-	
+
 	static const int num_bats = 2;
 	static const int num_pits = 2;
-	
+
 	static const int arrow_range = 3;
 	static const int num_arrows = 5;
 
