@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 CXX := clang++
-CXXFLAGS := -std=c++1y -Wall -O3
+CXXFLAGS := -std=c++1y -stdlib=libc++ -Wall -O3
 PROGNAME := hunt_the_wumpus
 
 all: ${PROGNAME}
