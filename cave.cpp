@@ -23,7 +23,8 @@ const std::string Cave::wumpus_moves_message = "You hear the sound of the wumpus
 
 const std::array<std::array<int, Cave::connections_per_room>, Cave::num_rooms> Cave::room_connections {{
 	{{1, 4, 5}}, {{2, 0, 7}}, {{3, 1, 9}}, {{4, 2, 11}}, {{0, 3, 13}},
-	{{6, 14, 0}}, {{7, 5, 15}}, {{8, 6, 1}}, {{9, 7, 16}}, {{10, 8, 2}}, {{11, 9, 17}}, {{12, 10, 3}}, {{13, 11, 18}}, {{14, 12, 4}}, {{5, 13, 19}},
+	{{6, 14, 0}}, {{7, 5, 15}}, {{8, 6, 1}}, {{9, 7, 16}}, {{10, 8, 2}},
+	{{11, 9, 17}}, {{12, 10, 3}}, {{13, 11, 18}}, {{14, 12, 4}}, {{5, 13, 19}},
 	{{16, 19, 6}}, {{17, 15, 8}}, {{18, 16, 10}}, {{19, 17, 12}}, {{15, 18, 14}}
 }};
 
@@ -90,7 +91,7 @@ void Cave::shuffle_room_numbers() {
 
 void Cave::sort_adjacent_rooms() {
 	for (Room& room : rooms) {
-		std::sort(room.adjacent_rooms.begin(), room.adjacent_rooms.end(),
+		std::sort(std::begin(room.adjacent_rooms), std::end(room.adjacent_rooms),
 			[](Room* first_room, Room* second_room) {
 				return first_room->number < second_room->number;
 			});

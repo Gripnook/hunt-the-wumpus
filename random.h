@@ -27,8 +27,8 @@ int random_if(int lower, int upper, UnaryPredicate pred) {
 // Container must be a container of integers.
 template <typename Container>
 int random(int lower, int upper, const Container& excludes) {
-	auto begin = excludes.begin();
-	auto end = excludes.end();
+	auto begin = std::begin(excludes);
+	auto end = std::end(excludes);
 	return random_if(lower, upper, [begin, end](int x) { return std::find(begin, end, x) == end; });
 }
 
