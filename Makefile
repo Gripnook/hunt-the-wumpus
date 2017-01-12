@@ -1,16 +1,26 @@
-SHELL := /bin/bash
 CXX := clang++
-CXXFLAGS := -std=c++1y -stdlib=libc++ -Wall -O3
-PROGNAME := hunt_the_wumpus
+CXXFLAGS := -std=c++14 -stdlib=libc++ -O -Wall
 
-all: ${PROGNAME}
+BIN := hunt_the_wumpus
+BUILD_DIR := ./build
+SRCS := $(wildcard *.cpp)
+OBJS := $(SRCS:%.cpp=$(BUILD_DIR)/%.o)
+DEPS := $(OBJS:.o=.d)
 
-${PROGNAME}: main.o cave.o
-	${CXX} ${CXXFLAGS} $^ -o $@
+all: $(BIN)
 
-main.o: main.cpp cave.h
-cave.o: cave.cpp cave.h random.h
+$(BIN): $(BUILD_DIR)/$(BIN)
 
+$(BUILD_DIR)/$(BIN): $(OBJS)
+	mkdir -p $(@D)
+	$(CXX) $(CXXFLAGS) $^ -o $@
+
+-include $(DEPS)
+
+$(BUILD_DIR)/%.o: %.cpp
+	mkdir -p $(@D)
+	$(CXX) $(CXXFLAGS) -MMD -c $< -o $@
+
+.PHONY: clean
 clean:
-	rm -rf *.o ${PROGNAME}
-
+	rm -rf $(BUILD_DIR)/$(BIN) $(OBJS) $(DEPS)
