@@ -1,5 +1,5 @@
 CXX := clang++
-CXXFLAGS := -std=c++14 -stdlib=libc++ -O -Wall
+CXXFLAGS := -std=c++1y -stdlib=libc++ -O -Wall
 
 BIN := hunt_the_wumpus
 BUILD_DIR := ./build
