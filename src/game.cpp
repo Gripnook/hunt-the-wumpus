@@ -52,25 +52,25 @@ std::string Game::game_info()
        << num_bats << " bats in the cave." << std::endl
        << "When you enter a room you will be told if a hazard is nearby:"
        << std::endl
-       << "	\"" << wumpus_adjacent_message << "\": It's in an adjacent room."
+       << "\t\"" << wumpus_adjacent_message << "\": It's in an adjacent room."
        << std::endl
-       << "	\"" << pit_adjacent_message
+       << "\t\"" << pit_adjacent_message
        << "\": One of the adjacent rooms is a bottomless pit." << std::endl
-       << "	\"" << bat_adjacent_message
+       << "\t\"" << bat_adjacent_message
        << "\": A giant bat is in an adjacent room." << std::endl
        << "During each turn you must make a move. The possible moves are:"
        << std::endl
-       << "	\"m #\": Move to an adjacent room." << std::endl
-       << "	\"s #[-#...]\": Shoot an arrow through the rooms specified. The"
+       << "\t\"m #\": Move to an adjacent room." << std::endl
+       << "\t\"s #[-#...]\": Shoot an arrow through the rooms specified. The"
        << std::endl
-       << "		first room number specified must be an adjacent room. The"
+       << "\t\tfirst room number specified must be an adjacent room. The"
        << std::endl
-       << "		range of an arrow is " << arrow_range
+       << "\t\trange of an arrow is " << arrow_range
        << " rooms, and a path will be chosen at" << std::endl
-       << "		random if not specified. You have " << num_arrows
+       << "\t\trandom if not specified. You have " << num_arrows
        << " arrows at the start of" << std::endl
-       << "		the game." << std::endl
-       << "	\"q\": Quit the game and flee the cave." << std::endl
+       << "\t\tthe game." << std::endl
+       << "\t\"q\": Quit the game and flee the cave." << std::endl
        << "Good luck!" << std::endl;
     return ss.str();
 }
