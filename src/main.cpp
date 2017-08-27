@@ -1,10 +1,9 @@
-#include "cave.h"
-using wumpus::Cave;
+#include "console_game.h"
+using namespace wumpus;
 
 int main()
 {
-    Cave cave;
-    cave.print_game_info();
-    cave.hunt();
+    Console_game game;
+    game.play();
     return 0;
 }

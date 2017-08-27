@@ -1,5 +1,4 @@
-#ifndef WUMPUS_RANDOM_H
-#define WUMPUS_RANDOM_H
+#pragma once
 
 #include <random>
 #include <algorithm>
@@ -15,8 +14,7 @@ int random(int lower, int upper)
 }
 
 // Returns a random integer in the range [lower, upper) that satisfies the given
-// predicate.
-// UnaryPredicate must be a predicate acting on an integer.
+// predicate. UnaryPredicate must be a predicate acting on an integer.
 template <typename UnaryPredicate>
 int random_if(int lower, int upper, UnaryPredicate pred)
 {
@@ -27,8 +25,7 @@ int random_if(int lower, int upper, UnaryPredicate pred)
 }
 
 // Returns a random integer in the range [lower, upper) that is not in the
-// excludes.
-// Container must be a container of integers.
+// excludes. Container must be a container of integers.
 template <typename Container>
 int random(int lower, int upper, const Container& excludes)
 {
@@ -39,5 +36,3 @@ int random(int lower, int upper, const Container& excludes)
     });
 }
 }
-
-#endif
