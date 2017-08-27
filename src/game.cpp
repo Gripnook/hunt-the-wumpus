@@ -149,7 +149,6 @@ bool Game::is_hunt_over() const
 
 void Game::inform_player_of_hazards()
 {
-    out << std::endl;
     bool wumpus = false, bat = false, pit = false;
     for (const Room* room : player_room->adjacent_rooms)
     {

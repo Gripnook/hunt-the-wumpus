@@ -25,6 +25,7 @@ void Console_game::print_game_info()
 
 void Console_game::play_round_of_hunt()
 {
+    std::cout << std::endl;
     game.inform_player_of_hazards();
     Action action = get_action();
     switch (action.type)
