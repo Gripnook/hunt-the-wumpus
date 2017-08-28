@@ -5,6 +5,27 @@
 
 namespace wumpus {
 
+std::string Console_game::game_info()
+{
+    std::stringstream ss;
+    ss << Game::game_info();
+    ss << "During each turn you must make a move. The possible moves are:"
+       << std::endl
+       << "    \"m #\": Move to an adjacent room." << std::endl
+       << "    \"s #[-#...]\": Shoot an arrow through the rooms specified. The"
+       << std::endl
+       << "        first room number specified must be an adjacent room. The"
+       << std::endl
+       << "        range of an arrow is " << arrow_range
+       << " rooms, and a path will be chosen at" << std::endl
+       << "        random if not specified. You have " << num_arrows
+       << " arrows at the start of" << std::endl
+       << "        the game." << std::endl
+       << "    \"q\": Quit the game and flee the cave." << std::endl
+       << "Good luck!" << std::endl;
+    return ss.str();
+}
+
 Console_game::Console_game() : game{std::cout}
 {
 }
@@ -20,7 +41,7 @@ void Console_game::play()
 
 void Console_game::print_game_info()
 {
-    std::cout << Game::game_info();
+    std::cout << game_info();
 }
 
 void Console_game::play_round_of_hunt()

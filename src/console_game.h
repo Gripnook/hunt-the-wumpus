@@ -19,6 +19,8 @@ struct Action
 class Console_game
 {
 public:
+    static std::string game_info();
+
     Console_game();
 
     void play();
